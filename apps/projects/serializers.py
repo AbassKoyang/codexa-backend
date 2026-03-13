@@ -12,9 +12,12 @@ class ProjectSerializer(serializers.ModelSerializer):
             "id",
             "owner",
             "name",
+            "slug",
+            "thumbnail",
+            "language",
             "file_tree",
             "is_deleted",
             "created_at",
             "updated_at",
         ]
-        read_only_fields = ["created_at", "updated_at"]
+        read_only_fields = ["slug", "created_at", "updated_at"]

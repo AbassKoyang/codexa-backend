@@ -33,7 +33,15 @@ class User(AbstractBaseUser, PermissionsMixin):
     password = models.CharField(max_length=128)
     first_name = models.CharField(max_length=30, default='', null=True, blank=True, help_text="The user's first name.")
     last_name = models.CharField(max_length=30, default='', null=True, blank=True, help_text="The user's last name.")
+    PLAN_CHOICES = [
+        ('free', 'Free'),
+        ('paid', 'Paid')
+    ]
+
     registration_method = models.CharField(max_length=20, choices=REGISTRATION_CHOICES, default='email')
+    plan = models.CharField(max_length=10, choices=PLAN_CHOICES, default='free')
+    paystack_customer_code = models.CharField(max_length=100, blank=True, null=True)
+    paystack_subscription_code = models.CharField(max_length=100, blank=True, null=True)
     profile_pic_url = models.URLField(blank=True, null=True)
     github = models.URLField(blank=True, null=True)
 

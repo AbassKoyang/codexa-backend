@@ -46,7 +46,16 @@ INSTALLED_APPS = [
     'corsheaders',
     'apps.accounts',
     'apps.projects',
+    'apps.subscriptions',
 ]
+
+# Paystack Settings
+PAYSTACK_SECRET_KEY = config('PAYSTACK_SECRET_KEY', default='')
+PAYSTACK_PLAN_CODE = config('PAYSTACK_PLAN_CODE', default='')
+
+# Email Settings
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+DEFAULT_FROM_EMAIL = 'no-reply@codexa.com'
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
