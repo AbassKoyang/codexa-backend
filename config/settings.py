@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'apps.accounts',
     'apps.projects',
     'apps.subscriptions',
+    'apps.ai',
 ]
 
 # Paystack Settings
