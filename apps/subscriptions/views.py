@@ -18,10 +18,10 @@ class InitializeSubscriptionView(APIView):
             return Response({"error": "PAYSTACK_PLAN_CODE is not configured on the server"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
         provider = PaystackProvider()
-        # The amount is usually defined by the plan code, but we pass it as a fallback or minimum.
-        # User recently updated this to 10000.
         amount = request.data.get('amount', 10000)
+        print(request.user.email, amount, plan_code)
         response = provider.initialize_transaction(request.user.email, amount, plan_code)
+        print(response)
         
         if response.get('status'):
             return Response(response['data'])

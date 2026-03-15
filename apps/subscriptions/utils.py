@@ -17,8 +17,11 @@ class PaystackProvider:
             "amount": str(amount),
             "plan": plan_code
         }
-        response = requests.post(url, headers=self.headers, json=data)
-        return response.json()
+        try:
+            response = requests.post(url, headers=self.headers, json=data)
+            return response.json()
+        except requests.exceptions.RequestException as e:
+            return {"status": False, "message": f"Connection error: {str(e)}"}
 
     def create_subscription(self, customer_code, plan_code):
         url = f"{self.base_url}/subscription"
@@ -26,10 +29,16 @@ class PaystackProvider:
             "customer": customer_code,
             "plan": plan_code
         }
-        response = requests.post(url, headers=self.headers, json=data)
-        return response.json()
+        try:
+            response = requests.post(url, headers=self.headers, json=data)
+            return response.json()
+        except requests.exceptions.RequestException as e:
+            return {"status": False, "message": f"Connection error: {str(e)}"}
 
     def verify_transaction(self, reference):
         url = f"{self.base_url}/transaction/verify/{reference}"
-        response = requests.get(url, headers=self.headers)
-        return response.json()
+        try:
+            response = requests.get(url, headers=self.headers)
+            return response.json()
+        except requests.exceptions.RequestException as e:
+            return {"status": False, "message": f"Connection error: {str(e)}"}

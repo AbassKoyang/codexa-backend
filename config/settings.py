@@ -52,7 +52,7 @@ INSTALLED_APPS = [
 
 # Paystack Settings
 PAYSTACK_SECRET_KEY = config('PAYSTACK_SECRET_KEY', default='')
-PAYSTACK_PLAN_CODE = config('PAYSTACK_PLAN_CODE', default='')
+PAYSTACK_PLAN_CODE = config('PAYSTACK_PLAN_CODE', default='PLN_c104edrie8ttv8f')
 
 # Email Settings
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
