@@ -42,6 +42,7 @@ class AICodeAssistantView(APIView):
         prompt = request.data.get("prompt")
         file_tree = request.data.get("file_tree")
         project_slug = request.data.get("project_slug")
+        mode = request.data.get("mode")
         history_raw = request.data.get("history")
         uploaded_file = request.FILES.get("file")
 
@@ -79,7 +80,7 @@ class AICodeAssistantView(APIView):
 
         def stream_generator():
             full_response = []
-            for chunk in generate_multimodal_stream(prompt, file_tree, file_bytes, mime_type, history):
+            for chunk in generate_multimodal_stream(prompt, file_tree, mode, file_bytes, mime_type, history):
                 if chunk == "ERROR_RATE_LIMIT":
                     yield "AI rate limit exceeded. Please try again later.\n"
                     break
