@@ -30,26 +30,36 @@ def generate_response(prompt):
         logger.error(f"Unexpected error in Gemini service: {e}")
         return "ERROR_UNKNOWN"
 
-def generate_multimodal_stream(prompt, file_tree, file_bytes=None, mime_type=None):
-    context_text = f"Project File Tree:\n{file_tree}\n\nUser Prompt: {prompt}"
+def generate_multimodal_stream(prompt, file_tree, file_bytes=None, mime_type=None, history=None):
+    # Prepare contents for the current turn
+    # If it's a new chat, we include the file tree as context.
+    # If it's an ongoing chat, we might just include the prompt, 
+    # but the user requested file tree and prompts are required context.
+    context_content = []
+    if file_tree:
+        context_content.append(f"Project File Tree:\n{file_tree}\n\n")
     
-    contents = []
     if file_bytes and mime_type:
-        contents.append(types.Part.from_bytes(data=file_bytes, mime_type=mime_type))
+        context_content.append(types.Part.from_bytes(data=file_bytes, mime_type=mime_type))
     
-    contents.append(context_text)
-    print(contents)
+    context_content.append(f"User Prompt: {prompt}")
 
     try:
-        response_stream = client.models.generate_content_stream(
+        # Create a chat session with history if provided
+        chat = client.chats.create(
             model="gemini-3.1-flash-lite-preview",
-            contents=contents,
+            history=history or [],
             config=types.GenerateContentConfig(
                 system_instruction=SYSTEM_INSTRUCTION
             )
         )
+        
+        # Send the current context as a message
+        response_stream = chat.send_message_stream(message=context_content)
+        
         for chunk in response_stream:
             yield chunk.text
+            
     except errors.ClientError as e:
         logger.error(f"Gemini API Client Error (Streaming): {e}")
         if "429" in str(e) or "RESOURCE_EXHAUSTED" in str(e):
