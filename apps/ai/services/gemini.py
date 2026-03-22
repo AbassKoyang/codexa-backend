@@ -1,11 +1,35 @@
 from google import genai
 from google.genai import errors, types
 import logging
+from pydantic import BaseModel, Field
+from typing import List, Optional, Literal, Union
+import sys
+
 
 logger = logging.getLogger(__name__)
 
-# The client gets the API key from the environment variable `GEMINI_API_KEY`.
 client = genai.Client()
+
+from typing import List, Union, Literal
+from pydantic import BaseModel, Field
+
+class File(BaseModel):
+    id: str
+    type: Literal["file", "folder"]
+    name: str
+    content: str
+
+# class Folder(BaseModel):
+#     id: str
+#     type: Literal["folder"]
+#     name: str
+#     # Use a string forward reference here for the recursive part
+#     children: List[Union[File, "Folder"]] = Field(default_factory=list)
+
+class GeminiResponse(BaseModel):
+    file_tree: List[File]
+    modified_files: List[str]
+    response: str
 
 def generate_response(prompt):
     try:
@@ -30,10 +54,6 @@ Your goal is to help users write, debug, and understand code.
 You will be provided with a prompt, the project's file structure (file tree), and potentially an image or PDF for context (e.g., a design mockup or documentation).
 Provide clear, concise, and accurate technical advice.
 """
-    # Prepare contents for the current turn
-    # If it's a new chat, we include the file tree as context.
-    # If it's an ongoing chat, we might just include the prompt, 
-    # but the user requested file tree and prompts are required context.
     context_content = []
     if file_tree:
         context_content.append(f"Project File Tree:\n{file_tree}\n\n")
@@ -44,15 +64,21 @@ Provide clear, concise, and accurate technical advice.
     context_content.append(f"User Prompt: {prompt}")
 
     if mode and mode == 'agent':
-        SYSTEM_INSTRUCTION = SYSTEM_INSTRUCTION + "[SYSTEM: You are in AGENT mode. If you need to modify any code, provide the FULL new content of each target file using this format: 'UPDATE: [filename]' followed by a code block. Then, provide a very brief summary of your changes. Avoid repeating the code outside of these blocks.]"
+        SYSTEM_INSTRUCTION = SYSTEM_INSTRUCTION + " You are in AGENT mode. You can modify the file tree by adding, updating, or deleting files. Use the file_tree field in the response to represent the updated file tree. Also provide a brief summary of your changes in the response field. List out the files you are modifying in the modified_files field."
 
     try:
         # Create a chat session with history if provided
+        if mode == "agent":
+            response_schema = GeminiResponse.model_json_schema()
+        else:
+            response_schema = None
         chat = client.chats.create(
             model="gemini-3.1-flash-lite-preview",
             history=history or [],
             config=types.GenerateContentConfig(
-                system_instruction=SYSTEM_INSTRUCTION
+                system_instruction=SYSTEM_INSTRUCTION,
+                response_mime_type="application/json",
+                response_schema=response_schema
             )
         )
         
@@ -60,7 +86,15 @@ Provide clear, concise, and accurate technical advice.
         response_stream = chat.send_message_stream(message=context_content)
         
         for chunk in response_stream:
-            yield chunk.text
+            # When using response_schema, chunks contain parts of the JSON string.
+            try:
+                text = chunk.text
+                if text:
+                    print(text)
+                    yield text
+            except (AttributeError, IndexError):
+                # Handle chunks that might not have text (e.g. only metadata)
+                continue
             
     except errors.ClientError as e:
         logger.error(f"Gemini API Client Error (Streaming): {e}")

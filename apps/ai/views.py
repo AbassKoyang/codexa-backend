@@ -104,10 +104,11 @@ class AICodeAssistantView(APIView):
 class ChatHistoryView(generics.ListAPIView):
     serializer_class = ChatMessageSerializer
     permission_classes = [IsAuthenticated]
+    pagination_class = None
 
     def get_queryset(self):
         project_slug = self.kwargs.get('project_slug')
+        project = Project.objects.get(slug=project_slug, owner=self.request.user)
         return ChatMessage.objects.filter(
-            project__slug=project_slug, 
-            project__owner=self.request.user
+            project_id=project.id
         ).order_by('timestamp')
