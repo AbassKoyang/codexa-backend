@@ -90,6 +90,22 @@ class DeleteUser(generics.DestroyAPIView):
     lookup_field = 'pk'
     lookup_url_kwarg='id'
 
+class UpdateUser(generics.UpdateAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    permission_classes = [IsAuthenticated,IsProfileOwner]
+    lookup_field = 'pk'
+    lookup_url_kwarg='id'
+
+class RetrieveUser(generics.RetrieveAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    permission_classes = [AllowAny]
+    throttle_classes = [ReadOnlyRateThrottle]
+
+    lookup_field = 'pk'
+    lookup_url_kwarg='id'
+
 class MeView(APIView):
     permission_classes = [IsAuthenticated]
 

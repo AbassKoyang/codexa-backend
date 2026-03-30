@@ -30,3 +30,14 @@ class ProjectDetailView(generics.RetrieveUpdateDestroyAPIView):
         instance.is_deleted = True
         instance.save()
 
+class DeleteProjectView(generics.DestroyAPIView):
+    serializer_class = ProjectSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    lookup_field = 'slug'
+
+    def get_queryset(self):
+        return Project.objects.filter(owner=self.request.user).active()
+
+    def perform_destroy(self, instance):
+        instance.is_deleted = True
+        instance.save()
