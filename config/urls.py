@@ -16,6 +16,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from . import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -23,4 +24,6 @@ urlpatterns = [
     path('api/projects/', include('apps.projects.urls')),
     path('api/subscriptions/', include('apps.subscriptions.urls')),
     path('api/ai/', include('apps.ai.urls')),
+    path('', views.db_version, name='db_version'),
+
 ]
