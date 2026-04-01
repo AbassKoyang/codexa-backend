@@ -8,9 +8,11 @@ from rest_framework.response import Response
 from rest_framework import status, permissions
 from apps.accounts.models import User
 from .utils import PaystackProvider
+from apps.accounts.throttles import PaymentRateThrottle
 
 class InitializeSubscriptionView(APIView):
     permission_classes = [permissions.IsAuthenticated]
+    throttle_classes = [PaymentRateThrottle]
 
     def post(self, request):
         plan_code = settings.PAYSTACK_PLAN_CODE

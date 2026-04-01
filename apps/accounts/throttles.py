@@ -21,3 +21,11 @@ class ReadOnlyRateThrottle(UserRateThrottle):
 
 class ReadOnlyAnonRateThrottle(AnonRateThrottle):
     rate = '30/min'
+
+
+class AIRateThrottle(UserRateThrottle):
+    scope = 'ai'
+
+
+class PaymentRateThrottle(UserRateThrottle):
+    scope = 'payment'

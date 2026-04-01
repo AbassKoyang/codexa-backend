@@ -9,9 +9,11 @@ from apps.projects.models import Project
 from .services.gemini import generate_response, generate_multimodal_stream
 from .models import ChatMessage
 from .serializers import ChatMessageSerializer
+from apps.accounts.throttles import AIRateThrottle
 
 class AIChatView(APIView):
     permission_classes = [IsAuthenticated]
+    throttle_classes = [AIRateThrottle]
 
     def post(self, request):
         prompt = request.data.get("prompt")
@@ -36,6 +38,7 @@ class AIChatView(APIView):
 
 class AICodeAssistantView(APIView):
     permission_classes = [IsAuthenticated]
+    throttle_classes = [AIRateThrottle]
     parser_classes = [MultiPartParser, FormParser]
 
     def post(self, request):
@@ -104,6 +107,7 @@ class AICodeAssistantView(APIView):
 class ChatHistoryView(generics.ListAPIView):
     serializer_class = ChatMessageSerializer
     permission_classes = [IsAuthenticated]
+    throttle_classes = [AIRateThrottle]
     pagination_class = None
 
     def get_queryset(self):
